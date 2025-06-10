@@ -52,11 +52,10 @@
 		<tinkar-starter-data.version>1.1.2</tinkar-starter-data.version>
 		<tinkar-starter-data.classifier>unreasoned-sa</tinkar-starter-data.classifier>
 		<!-- Plugin Versions -->
-		<tinkar-maven-artifacts.version>1.20.0</tinkar-maven-artifacts.version>
+		<tinkar-maven-artifacts.version>1.23.0</tinkar-maven-artifacts.version>
 		<maven-dependency-plugin>3.8.1</maven-dependency-plugin>
 		<build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
 		<!-- Properties for Ease of Use -->
-		<datastore.path>${project.build.directory}/${tinkar-starter-data.artifactId}-${tinkar-starter-data.version}-${tinkar-starter-data.classifier}</datastore.path>
 		<data-artifact.prefix>${project.artifactId}-${project.version}</data-artifact.prefix>
 	</properties>
 
@@ -67,9 +66,6 @@
 					<groupId>dev.ikm.maven.tinkar</groupId>
 					<artifactId>tinkar-maven-plugin</artifactId>
 					<version>${tinkar-maven-artifacts.version}</version>
-					<configuration>
-						<dataStore>${datastore.path}</dataStore>
-					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -95,40 +91,14 @@
 
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>unpack-tinkar-starter-data-dependency</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>${tinkar-starter-data.groupId}</groupId>
-									<artifactId>${tinkar-starter-data.artifactId}</artifactId>
-									<version>${tinkar-starter-data.version}</version>
-									<classifier>${tinkar-starter-data.classifier}</classifier>
-									<type>zip</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}</outputDirectory>
-								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>dev.ikm.maven.tinkar</groupId>
 				<artifactId>tinkar-maven-plugin</artifactId>
 				<executions>
 					<!-- Import Provided Data Resources -->
 					<execution>
-						<id>import-data-dependencies</id>
+						<id>${project.artifactId}-import-data-resources</id>
 						<goals>
-							<goal>load-data</goal>
+							<goal>load-data-isolated</goal>
 						</goals>
 						<configuration>
 							<filesets>
@@ -136,16 +106,25 @@
 									<directory>${project.build.directory}/input-data</directory>
 									<includes>
 										<include>**pb.zip</include>
+										<include>**ike-cs.zip</include>
+									</includes>
+								</fileset>
+								<fileset>
+									<directory>src/main/resources</directory>
+									<includes>
+										<include>**pb.zip</include>
+										<include>**ike-cs.zip</include>
 									</includes>
 								</fileset>
 							</filesets>
 						</configuration>
 					</execution>
+					<!-- Export unreasoned data as a protocol buffers zip file -->
 					<execution>
 						<id>${project.artifactId}-unreasoned-export</id>
 						<phase>compile</phase> <!-- Overriding default phase to force this execution before reasoning -->
 						<goals>
-							<goal>export-tinkar-data</goal>
+							<goal>export-tinkar-data-isolated</goal>
 						</goals>
 						<configuration>
 							<fileName>${data-artifact.prefix}-unreasoned-pb.zip</fileName>
@@ -155,14 +134,14 @@
 					<execution>
 						<id>${project.artifactId}-full-reasoner</id>
 						<goals>
-							<goal>run-full-reasoner</goal>
+							<goal>run-full-reasoner-isolated</goal>
 						</goals>
 					</execution>
-					<!-- Export data as a protocol buffers zip file -->
+					<!-- Export reasoned data as a protocol buffers zip file -->
 					<execution>
 						<id>${project.artifactId}-reasoned-export</id>
 						<goals>
-							<goal>export-tinkar-data</goal>
+							<goal>export-tinkar-data-isolated</goal>
 						</goals>
 						<configuration>
 							<exportDirectory>${project.build.directory}</exportDirectory>
@@ -174,6 +153,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
+				<!-- Attach reasoned and unreasoned exports to the artifact -->
 				<executions>
 					<execution>
 						<id>attach-artifacts</id>
@@ -237,25 +217,27 @@
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>dev.ikm.maven.tinkar</groupId>
-						<artifactId>tinkar-maven-plugin</artifactId>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
 						<executions>
-							<!-- Import Provided Data Resources -->
 							<execution>
-								<id>import-data-resources</id>
+								<id>copy-starter-data-parent-dependency</id>
+								<phase>generate-sources</phase>
 								<goals>
-									<goal>load-data</goal>
+									<goal>copy</goal>
 								</goals>
 								<configuration>
-									<filesets>
-										<fileset>
-											<directory>src/main/resources/</directory>
-											<includes>
-												<include>**pb.zip</include>
-												<include>**ike-cs.zip</include>
-											</includes>
-										</fileset>
-									</filesets>
+									<artifactItems>
+										<artifactItem>
+											<groupId>${tinkar-starter-data.groupId}</groupId>
+											<artifactId>${tinkar-starter-data.artifactId}</artifactId>
+											<version>${tinkar-starter-data.version}</version>
+											<classifier>unreasoned-pb</classifier>
+											<type>zip</type>
+											<overWrite>true</overWrite>
+											<outputDirectory>${project.build.directory}/input-data</outputDirectory>
+										</artifactItem>
+									</artifactItems>
 								</configuration>
 							</execution>
 						</executions>

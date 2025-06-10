@@ -29,11 +29,11 @@
 						<filters>
 							<filter>
 								<allowedMemberships>
-									<publicId>
+									<tinkarStarterDataPatternPublicId>
 										<uuids>
 											<uuid>${membershipExportUuid}</uuid>
 										</uuids>
-									</publicId>
+									</tinkarStarterDataPatternPublicId>
 								</allowedMemberships>
 							</filter>
 						</filters>
