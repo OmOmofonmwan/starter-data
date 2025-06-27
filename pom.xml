@@ -49,10 +49,9 @@
 		<!-- Tinkar Starter Data Properties -->
 		<tinkar-starter-data.groupId>dev.ikm.data.tinkar</tinkar-starter-data.groupId>
 		<tinkar-starter-data.artifactId>tinkar-starter-data</tinkar-starter-data.artifactId>
-		<tinkar-starter-data.version>1.1.2</tinkar-starter-data.version>
-		<tinkar-starter-data.classifier>unreasoned-sa</tinkar-starter-data.classifier>
+		<tinkar-starter-data.version>1.7.0</tinkar-starter-data.version>
 		<!-- Plugin Versions -->
-		<tinkar-maven-artifacts.version>1.24.0</tinkar-maven-artifacts.version>
+		<tinkar-maven-artifacts.version>1.28.0</tinkar-maven-artifacts.version>
 		<maven-dependency-plugin>3.8.1</maven-dependency-plugin>
 		<build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
 		<!-- Properties for Ease of Use -->
