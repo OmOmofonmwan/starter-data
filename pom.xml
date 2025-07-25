@@ -91,6 +91,7 @@
 					<artifactId>central-publishing-maven-plugin</artifactId>
 					<configuration>
 						<skipPublishing>true</skipPublishing>
+						<autoPublish>false</autoPublish>
 					</configuration>
 				</plugin>
 			</plugins>
