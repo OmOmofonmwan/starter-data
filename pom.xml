@@ -85,6 +85,14 @@
 						</commitMessages>
 					</configuration>
 				</plugin>
+				<!-- Skip Staging Plugin -->
+				<plugin>
+					<groupId>org.sonatype.central</groupId>
+					<artifactId>central-publishing-maven-plugin</artifactId>
+					<configuration>
+						<skipPublishing>true</skipPublishing>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 
@@ -195,12 +203,6 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<!-- Skip Staging Plugin -->
-			<plugin>
-				<groupId>org.sonatype.central</groupId>
-				<artifactId>central-publishing-maven-plugin</artifactId>
-				<inherited>false</inherited>
 			</plugin>
 		</plugins>
 	</build>
