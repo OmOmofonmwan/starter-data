@@ -39,6 +39,14 @@
 						</filters>
 					</configuration>
 				</plugin>
+				<!-- Allow Staging for this submodule -->
+				<plugin>
+					<groupId>org.sonatype.central</groupId>
+					<artifactId>central-publishing-maven-plugin</artifactId>
+					<configuration>
+						<skipPublishing>false</skipPublishing>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
