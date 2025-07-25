@@ -92,6 +92,7 @@
 					<configuration>
 						<skipPublishing>true</skipPublishing>
 						<autoPublish>false</autoPublish>
+						<waitUntil>uploaded</waitUntil>
 					</configuration>
 				</plugin>
 			</plugins>
