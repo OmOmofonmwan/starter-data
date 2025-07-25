@@ -45,6 +45,8 @@
 					<artifactId>central-publishing-maven-plugin</artifactId>
 					<configuration>
 						<skipPublishing>false</skipPublishing>
+                        <autoPublish>true</autoPublish>
+						<waitUntil>uploaded</waitUntil>
 					</configuration>
 				</plugin>
 			</plugins>
