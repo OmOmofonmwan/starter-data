@@ -331,7 +331,7 @@
 	</profiles>
 
 	<modules>
-		<module>tinkar-starter-data</module>
 		<module>komet-starter-data</module>
+		<module>tinkar-starter-data</module>
 	</modules>
 </project>
