@@ -15,10 +15,6 @@
 	<name>Tinkar Starter Data</name>
 	<description>Tinkar Starter Data Project</description>
 
-	<properties>
-		<membershipExportUuid>6070f6f5-893d-5144-adce-7d305c391cf9</membershipExportUuid>
-	</properties>
-
 	<build>
 		<pluginManagement>
 			<plugins>
@@ -26,17 +22,13 @@
 					<groupId>dev.ikm.maven.tinkar</groupId>
 					<artifactId>tinkar-maven-plugin</artifactId>
 					<configuration>
-						<filters>
-							<filter>
-								<allowedMemberships>
-									<tinkarStarterDataPatternPublicId>
-										<uuids>
-											<uuid>${membershipExportUuid}</uuid>
-										</uuids>
-									</tinkarStarterDataPatternPublicId>
-								</allowedMemberships>
-							</filter>
-						</filters>
+						<filter>
+							<memberships>
+								<tinkarStarterDataPattern>
+									<bindingName>TINKAR_BASE_MODEL_COMPONENT_PATTERN</bindingName>
+								</tinkarStarterDataPattern>
+							</memberships>
+						</filter>
 					</configuration>
 				</plugin>
 				<!-- Allow Staging for this submodule -->
