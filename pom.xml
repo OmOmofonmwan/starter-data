@@ -51,9 +51,11 @@
 		<tinkar-starter-data.artifactId>tinkar-starter-data</tinkar-starter-data.artifactId>
 		<tinkar-starter-data.version>1.7.0</tinkar-starter-data.version>
 		<!-- Plugin Versions -->
-		<tinkar-maven-artifacts.version>1.28.0</tinkar-maven-artifacts.version>
+		<tinkar-maven-artifacts.version>1.33.0</tinkar-maven-artifacts.version>
 		<maven-dependency-plugin>3.8.1</maven-dependency-plugin>
 		<build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
+		<flatten-maven-plugin.version>1.7.2</flatten-maven-plugin.version>
+		<central-custom-publishing-maven-plugin.version>0.0.3</central-custom-publishing-maven-plugin.version>
 		<!-- Properties for Ease of Use -->
 		<data-artifact.prefix>${project.artifactId}-${project.version}</data-artifact.prefix>
 	</properties>
@@ -85,80 +87,29 @@
 						</commitMessages>
 					</configuration>
 				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>flatten-maven-plugin</artifactId>
+					<version>${flatten-maven-plugin.version}</version>
+					<configuration>
+						<flattenMode>resolveCiFriendliesOnly</flattenMode>
+						<updatePomFile>true</updatePomFile>
+						<keepCommentsInPom>true</keepCommentsInPom>
+						<outputDirectory>${project.build.directory}</outputDirectory>
+					</configuration>
+				</plugin>
 				<!-- Skip Staging Plugin -->
 				<plugin>
 					<groupId>org.sonatype.central</groupId>
 					<artifactId>central-publishing-maven-plugin</artifactId>
 					<configuration>
 						<skipPublishing>true</skipPublishing>
-						<autoPublish>false</autoPublish>
-						<waitUntil>uploaded</waitUntil>
 					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
 
 		<plugins>
-			<plugin>
-				<groupId>dev.ikm.maven.tinkar</groupId>
-				<artifactId>tinkar-maven-plugin</artifactId>
-				<executions>
-					<!-- Import Provided Data Resources -->
-					<execution>
-						<id>${project.artifactId}-import-data-resources</id>
-						<goals>
-							<goal>load-data-isolated</goal>
-						</goals>
-						<configuration>
-							<filesets>
-								<fileset>
-									<directory>${project.build.directory}/input-data</directory>
-									<includes>
-										<include>**pb.zip</include>
-										<include>**ike-cs.zip</include>
-									</includes>
-								</fileset>
-								<fileset>
-									<directory>src/main/resources</directory>
-									<includes>
-										<include>**pb.zip</include>
-										<include>**ike-cs.zip</include>
-									</includes>
-								</fileset>
-							</filesets>
-						</configuration>
-					</execution>
-					<!-- Export unreasoned data as a protocol buffers zip file -->
-					<execution>
-						<id>${project.artifactId}-unreasoned-export</id>
-						<goals>
-							<goal>export-tinkar-data-isolated</goal>
-						</goals>
-						<configuration>
-							<unreasoned>true</unreasoned>
-							<fileName>${data-artifact.prefix}-unreasoned-pb.zip</fileName>
-						</configuration>
-					</execution>
-					<!-- Run full reasoner -->
-					<execution>
-						<id>${project.artifactId}-full-reasoner</id>
-						<goals>
-							<goal>run-full-reasoner-isolated</goal>
-						</goals>
-					</execution>
-					<!-- Export reasoned data as a protocol buffers zip file -->
-					<execution>
-						<id>${project.artifactId}-reasoned-export</id>
-						<goals>
-							<goal>export-tinkar-data-isolated</goal>
-						</goals>
-						<configuration>
-							<exportDirectory>${project.build.directory}</exportDirectory>
-							<fileName>${data-artifact.prefix}-reasoned-pb.zip</fileName>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
@@ -188,6 +139,21 @@
 				</executions>
 			</plugin>
 
+			<!-- Prepare poms with revision versions for publishing -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>flatten</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>flatten</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 			<!-- Skip Enforcer Rule -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -210,6 +176,156 @@
 	</build>
 
 	<profiles>
+		<profile>
+			<id>generateData</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>dev.ikm.maven.tinkar</groupId>
+						<artifactId>tinkar-maven-plugin</artifactId>
+						<executions>
+							<!-- Import Provided Data Resources -->
+							<execution>
+								<id>${project.artifactId}-import-data-resources</id>
+								<goals>
+									<goal>load-data</goal>
+								</goals>
+								<configuration>
+									<filesets>
+										<fileset>
+											<directory>${project.build.directory}/input-data</directory>
+											<includes>
+												<include>**pb.zip</include>
+												<include>**ike-cs.zip</include>
+											</includes>
+										</fileset>
+										<fileset>
+											<directory>src/main/resources</directory>
+											<includes>
+												<include>**pb.zip</include>
+												<include>**ike-cs.zip</include>
+											</includes>
+										</fileset>
+									</filesets>
+								</configuration>
+							</execution>
+							<!-- Export unreasoned data as a protocol buffers zip file -->
+							<execution>
+								<id>${project.artifactId}-unreasoned-export</id>
+								<phase>process-classes</phase>
+								<goals>
+									<goal>export-tinkar-data</goal>
+								</goals>
+								<configuration>
+									<unreasoned>true</unreasoned>
+									<fileName>${data-artifact.prefix}-unreasoned-pb.zip</fileName>
+								</configuration>
+							</execution>
+							<!-- Verify Unreasoned Export -->
+							<execution>
+								<id>${project.artifactId}-unreasoned-export-verification</id>
+								<phase>process-classes</phase>
+								<goals>
+									<goal>verify-export</goal>
+								</goals>
+								<configuration>
+									<dataStore>${project.build.directory}/datastore-unreasoned-verification</dataStore>
+									<filesets>
+										<fileset>
+											<directory>${project.build.directory}</directory>
+											<includes>
+												<include>${data-artifact.prefix}-unreasoned-pb.zip</include>
+											</includes>
+										</fileset>
+										<fileset>
+											<directory>${project.build.directory}/data-dependencies</directory>
+											<includes>
+												<include>**pb.zip</include>
+												<include>**ike-cs.zip</include>
+											</includes>
+										</fileset>
+									</filesets>
+								</configuration>
+							</execution>
+							<!-- Load Unreasoned Export -->
+							<execution>
+								<id>${project.artifactId}-load-unreasoned-data</id>
+								<phase>process-classes</phase>
+								<goals>
+									<goal>load-data</goal>
+								</goals>
+								<configuration>
+									<dataStore>${project.build.directory}/datastore-reasoned</dataStore>
+									<filesets>
+										<fileset>
+											<directory>${project.build.directory}</directory>
+											<includes>
+												<include>${data-artifact.prefix}-unreasoned-pb.zip</include>
+											</includes>
+										</fileset>
+									</filesets>
+									<fileset>
+										<directory>${project.build.directory}/data-dependencies</directory>
+										<includes>
+											<include>**pb.zip</include>
+											<include>**ike-cs.zip</include>
+										</includes>
+									</fileset>
+								</configuration>
+							</execution>
+							<!-- Run full reasoner -->
+							<execution>
+								<id>${project.artifactId}-full-reasoner</id>
+								<goals>
+									<goal>run-full-reasoner</goal>
+								</goals>
+								<configuration>
+									<dataStore>${project.build.directory}/datastore-reasoned</dataStore>
+								</configuration>
+							</execution>
+							<!-- Export reasoned data as a protocol buffers zip file -->
+							<execution>
+								<id>${project.artifactId}-reasoned-export</id>
+								<goals>
+									<goal>export-tinkar-data</goal>
+								</goals>
+								<configuration>
+									<dataStore>${project.build.directory}/datastore-reasoned</dataStore>
+									<exportDirectory>${project.build.directory}</exportDirectory>
+									<fileName>${data-artifact.prefix}-reasoned-pb.zip</fileName>
+									<filter></filter>
+								</configuration>
+							</execution>
+							<!-- Verify Reasoned Export -->
+							<execution>
+								<id>${project.artifactId}-reasoned-export-verification</id>
+								<goals>
+									<goal>verify-export</goal>
+								</goals>
+								<configuration>
+									<dataStore>${project.build.directory}/datastore-reasoned-verification</dataStore>
+									<filesets>
+										<fileset>
+											<directory>${project.build.directory}</directory>
+											<includes>
+												<include>${data-artifact.prefix}-reasoned-pb.zip</include>
+											</includes>
+										</fileset>
+										<fileset>
+											<directory>${project.build.directory}/data-dependencies</directory>
+											<includes>
+												<include>**pb.zip</include>
+												<include>**ike-cs.zip</include>
+											</includes>
+										</fileset>
+									</filesets>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<profile>
 			<id>starter-data-parent</id>
 			<activation>
@@ -263,7 +379,7 @@
 						<executions>
 							<execution>
 								<id>copy-starter-data-parent-dependency</id>
-								<phase>generate-sources</phase>
+								<phase>process-resources</phase>
 								<goals>
 									<goal>copy</goal>
 								</goals>
